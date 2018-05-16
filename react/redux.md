@@ -26,20 +26,20 @@ Redux是FB推出的一个状态管理的库，是在Flux的基础上改善和优
 ```js
 // reducer
 const initialState = {
-	value: 1
+  value: 1
 }
 
 const reducer = (state = initialState, action) => {
-	switch (action.type) {
-		case 'ADD': 
-			return {
-				...state,
-				value: state.value + action.payload
-			}
-		break
+  switch (action.type) {
+    case 'ADD': 
+      return {
+        ...state,
+        value: state.value + action.payload
+      }
+    break
 
-		default: return state
-	}
+    default: return state
+  }
 }
 
 // store
@@ -51,22 +51,22 @@ const somePreloadState = {}
 
 
 const reducers = combineReducers({
-	reducerA: reducer,
-	reducerB: other // other...
+  reducerA: reducer,
+  reducerB: other // other...
 })
 
 const store = createStore(reducers, somePreloadState)
 
 const unsubscribe = store.subscribe(() => {
-	console.log(store.getState()) // -> { reducerA: { value: 11 } }
+  console.log(store.getState()) // -> { reducerA: { value: 11 } }
 })
 
 // action
 const todo = value => {
-	return {
-		type: 'ADD',
-		payload: value
-	}
+  return {
+    type: 'ADD',
+    payload: value
+  }
 }
 store.dispatch(todo(10))
 ```
@@ -102,46 +102,46 @@ import { connect } from 'react-redux'
 
 const connectComponent = Component => {
 
-	const mapStateToProps = state => {
-		return {
-			reducerA: state.reducerA
-		}
+  const mapStateToProps = state => {
+    return {
+      reducerA: state.reducerA
+    }
 
-		// 你也可以一股脑的将所有的state全捆绑上去，但要注意命名，不要与组件的props的属性重叠了
-		return {
-			...state
-		}
-	}
+    // 你也可以一股脑的将所有的state全捆绑上去，但要注意命名，不要与组件的props的属性重叠了
+    return {
+      ...state
+    }
+  }
 
-	const mapDispatchToProps = dispatch => {
-		return {
-			// 这样写的好处就是直接调用todo(10)就可以了，不需要写dispatch(todo(10))
-			todo: bindActionCreators(todo, dispatch)
-		}
-	}
+  const mapDispatchToProps = dispatch => {
+    return {
+      // 这样写的好处就是直接调用todo(10)就可以了，不需要写dispatch(todo(10))
+      todo: bindActionCreators(todo, dispatch)
+    }
+  }
 
-	return connect(
-		mapStateToProps,
-		mapDispatchToProps,
-	)(Component)
-	
+  return connect(
+    mapStateToProps,
+    mapDispatchToProps,
+  )(Component)
+  
 }
 
 // some component
 import React, { Component } from 'react'
 
 class SomeComponent extends Component {
-	constructor(props) {
-		super(props)
-	}
+  constructor(props) {
+    super(props)
+  }
 
-	componentDidMount() {
-		this.props.todo(10) // -> dispatch一个action
-	}
+  componentDidMount() {
+    this.props.todo(10) // -> dispatch一个action
+  }
 
-	render() {
-		return (<div>{ this.props.reducerA.value }</div>)
-	}
+  render() {
+    return (<div>{ this.props.reducerA.value }</div>)
+  }
 }
 
 const SomeComponentWithStore = connectComponent(SomeComponent) // -> 关键调用
@@ -151,10 +151,10 @@ import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 
 render(
-	<Provider store={store}>
-		<SomeComponentWithStore />
-	</Provider>,
-	document.getElementById('root')
+  <Provider store={store}>
+    <SomeComponentWithStore />
+  </Provider>,
+  document.getElementById('root')
 )
 ```
 
