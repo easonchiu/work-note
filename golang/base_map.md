@@ -127,8 +127,9 @@ fmt.Println(val, exist) // -> 0 false
 ```
 
 
-### map在作为参数传递的时候有个特殊的情况：
+### map在作为参数传递：
 
+**map在声明的时候返回一个指针**
 ```go
 
 func set(m map[string][string]) {
@@ -146,28 +147,4 @@ set(m)
 fmt.Println(m) // -> map[a:999]
 ```
 
-也就是说，当将map传递给另一个函数，那个函数如果对该map进行操作，这个map本身也会被改变，这一点和大多数数据类型的表现不同。
-
-### 下面这种情况也不例外：
-```go
-
-type test struct {
-  foo map[string]int
-}
-
-func set(s test) {
-  s.foo["a"] = 999
-}
-
-s := test{
-  foo: map[string]int{
-    "a": 1,
-  }
-}
-
-fmt.Println(s) // -> {map[a:1]}
-
-set(s)
-
-fmt.Println(s) // -> {map[a:999]}
-```
+也就是说，map在声明的时候，得到的是这个map的地址，当将它传递给另一个函数并操作，因为是指针操作，这个map本身当然是会被改变的。
