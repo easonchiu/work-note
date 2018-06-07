@@ -319,3 +319,25 @@ fmt.Println(arr, s)
 // s   -> [100, 2, 3, 4, 5, 99]
 ```
 
+### array或slice的值如果是struct或map类型，可省略其类型
+
+```go
+
+// 值是个map[string]int
+s := []map[string]int{
+  {"a": 1},
+  {"b": 2},
+  {"c": 3},
+}
+
+type some struct {
+  name string
+  old  int
+}
+
+s2 := []some{
+  {name: "eason", old: 18},
+  {name: "who?", old: 100},
+}
+
+```
