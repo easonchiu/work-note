@@ -24,6 +24,10 @@ foo := map[bool]bool{
 }
 ```
 
+### map的key的限制
+
+key不允许func、map或是slice，它可以是个struct，但实际好像意义不大
+
 ### 设置值：
 ```go
 m := make(map[string]string)
@@ -73,6 +77,9 @@ hello(m2["world"].(string)) // ok!
 需要注意的是这种转换与强制类型转换不同，当它不属于这个类型时，它是会报runtime错误的！！
 
 ### 获取一个值：
+
+如果取的值不存在，并不会报错，而是返回该类型的一个空值
+
 ```go
 foo := map[string]int{
   "a": 1,
@@ -129,7 +136,7 @@ fmt.Println(val, exist) // -> 0 false
 
 ### map在作为参数传递：
 
-map作为参数传递时是引用传递的
+map作为参数传递时是引用传递的，其原因是因为他实际上是hash表的引用
 
 ```go
 
