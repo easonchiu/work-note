@@ -1,386 +1,445 @@
+## 变量与常量
 
-## 数组(array)和切片(slice)
+### 数据类型
 
-golang里数组和切片是两个不同的数据类型，但又有着微妙的关系，即slice是array的一个view，就是当你创建一个array时，只是创建了一个array，但当你创建一个slice时，背后肯定有个array，不管是你自己声明的或是系统帮你创建的。
-
-### 声明数组
-
-数组声明的基本格式是[n]Type
+在学习变量之前我们先来了解一下golang有哪些数据类型
 
 ```go
 
-arr := [5]int{1, 2}
+// 有符号整型
+int, int8, int16, int32(rune), int64
 
-// 或者让计算机告诉我们其长度
-arr := [...]int{1, 2, 3}
+// int:
+// 在32位机器上运行他就是int32，如果是在64位机上运行那他就是int64
 
-// 或者带索引的方式设置
-arr := [...]string{0: "a", 2: "b", 5: "c"}
+// 无符号整型
+uint, uint8(byte), uint16, uint32, uint64
 
-```
-注意当内容不足定义的长度时，剩余的将会以零值作为填充，但如果超过的话就是编译错误
+// uint与int性质一样
 
-### 数组按值传递
+// 复数（包含实数和虚数部分）
+complex64, complex128
 
-golang的数组其实是值类型，在作为参数传递给其他函数时是按值传递的，也就是说会拷贝一份，这和大多数的语言表现不一致。
+// 字符串
+string
 
-**要注意的是，如果是个[5]int的数组作为参数，func的接收参数也必须是 [5]int 或 \*[5]int ，不然都会编译错误**
+// 数组与slice
+[N]Type, []Type
 
-**还有要注意的是fun的参数类型不可以是[...]int，也会有编译问题**
+// map
+map[Type]Type
 
-```go
-func do(arr [5]int) {
-  arr[0] = 100
-}
-
-arr := [5]int{}
-
-do(arr)
-
-fmt.Println(arr) // -> [0 0 0 0 0]
-
-// 如果需要改变其数据的话需要传递该数组的指针
-// 注意参数arr变成了&arr，表明是取地址
-
-func ptrDo(arr *[5]int) {
-  arr[0] = 100
-}
-
-ptrDo(&arr)
-
-fmt.Println(arr) // -> [100 0 0 0 0]
-```
-
-### 数组可以比较
-
-因为他是值类型，所以是可以比较的，他和javascript的表现不同，javascript的数组比较是内存地址的比较，所以要比较内容相同相对困难，golang的数组直接==比较就行，其比较的是内部的数据，而非地址。
-
-**但要注意的是[3]int和[5]int是不同的数据类型，不能比较，会编译错误**
-
-```go
-
-arr1 := [3]int{1, 2, 3}
-
-arr2 := [5]int{1, 2, 3, 4, 5}
-
-arr3 := [3]int{4, 5, 6}
-
-fmt.Println(arr1 == arr2) // -> 编译错误
-
-fmt.Println(arr1 == arr3) // -> 编译正确，但返回false，因为内部数据不同
-
+// func
+func(...Type) ...Type
 
 ```
 
-## 其实更多的时候我们使用slice
+### 声明变量的方式
 
-slice其实是数组的一个view，什么意思呢，下面例子：
+golang可以使用var或const关键字声明，或者使用:=进行短声明，他是声明+赋值的一个过程，并且短声明不能指定类型（由系统来判定他是什么类型），所以对变量第一次声明时用了:=，那么之后就需要使用=，不能用:=再进行值的修改，但也有例外情况（后面会讲到）
+
+在使用const和var这两种方式声明的时候，可以在包内或函数体内进行声明，而短声明(:=)只允许在函数体内，另外，声明的时候可以省略类型，系统会帮我们判断是什么类型（并不代表他是任意类型）
+
+注意：const在声明的时候就需要赋值，且在拼接的时候他也只允许是两个const声明的常量进行拼接
 
 ```go
 
-arr := [5]int{1, 2, 3, 4, 5}
+var a int = 100
 
-s := arr[:]
+var b = "foo" // 系统会判断他是string类型
 
-s[0] = 100
+const d = []int{1, 2, 3}
 
-fmt.Println(arr) // -> [100, 2, 3, 4, 5]
+var n, m int = 100, 200
+
+var j, k = 100, "str"
+
+c := 100 + 5i // 复数
+
+q, p := 999, 666
 ```
 
-slice映射了这个声明的array，改变其slice之后，array的数据也会跟着改变
-
-### 声明slice
-
-上面例子中我们声明了一个slice，使用的是ar[:]的方式，[:]的意思是[Start:End]，我们可以显式的输入两个int告诉他开始的结束的位置，如果不写，Start默认是0，End默认是其长度，Start和End遵循左开右闭的结构，即包含左边的值不包含右边的值
+以下情况会报错
 
 ```go
-arr := [5]string{"a", "b", "c", "d", "e"}
 
-s := arr[0:len(arr)] // -> ["a", "b", "c", "d", "e"]
+const a = 100
 
-// 上面的写法等同于 arr[:]
+let b = 200
 
-s = arr[0:1] // -> ["a"]
+const c = a + b // !! 报错
 
-s = arr[1:3] // -> ["b", "c"]
+```
+```go
+
+const n int // !! 报错
+
+```
+```go
+
+const n = 100
+
+n = 200 // !! 报错
+
+```
+```go
+
+k := "str"
+
+k := "hello" // !! 报错
+
+```
+```go
+
+q := "str"
+
+q = 100 // !! 报错
+
+```
+```go
+// 等等...
 ```
 
-### slice的直接声明
+前面我们说到:=声明+赋值只允许一次，重复这么干会报错，但也有例外情况
 
-slice也可以在没有array的情况下直接声明
-
-**但其实系统还是会内建一个array，只是我们看不到，但他是存在的**
+这种情况并不会报错，因为c是一个新的变量，所以允许a与c一起声明的时候使用:=，但如果c在之前已经存在了，那还是会报错的
 
 ```go
 
-s := []int{1, 2, 3} // 其背后隐藏着一个array
+a, b := 100, 200
 
-// slice可以在slice的基础上再建立一个view
+a, c := 200, 300
 
-s2 := s[1:3] // -> [2, 3]
-
-// 如果我对s2进行操作
-s2[0] = 100
-
-fmt.Println(s2) // -> [100, 3]
-
-// 也是会影响到s这个slice的
-// 但s2[0]并不代表s[0]，实际上是影响其对应下标上的值
-fmt.Println(s) // -> [1, 100, 3]
 ```
 
-### slice作为参数是引用传递，和array不同
-
-通过上面的例子这个问题已经显而易见了，而且作为参数传递时他表现的不像array那么的难用
+go语言还允许var和const声明一组的变量/常量，:=声明的方式不允许组的方式
 
 ```go
-func do(s []int) {
-  s[0] = 100
-}
+// var
 
-s := []int{1, 2, 3}
+var (
+  a = 1
+  b = "str"
+  c = false
+)
 
-do(s)
+// const
 
-fmt.Println(s) // -> [100, 2, 3]
+const (
+  a = 1
+  b = "str"
+  c = false
+)
 ```
 
-### slice的容量
-
-slice不光有len这个属性，而且还有一个cap，这个是array没有的
-
-```go
-arr := [5]int{1, 2, 3, 4, 5}
-
-s := arr[:3] // -> [1, 2, 3]
-
-fmt.Printf("%v", len(s)) // 3
-
-fmt.Printf("%v", cap(s)) // 5 !!!
-```
-
-上面例子中，len是3没毛病，因为他就装了3个值，那5哪来的呢
-
-slice还有个特性就是他在view这个数组的时候，他的容量是前面提到的那个Start一直到这个数组的最后的这个长度，也就是说上面的例子中s除了1、2、3，还隐藏着2个数字，4和5！
-
-但Start之前的数据，他就扔掉了
+const在按组声明的方式还有另一个特点，就是如果这个常量没有赋值，他将继承前一个值，并且他可以与iota形成一个奇妙的组合，在后面会讲到
 
 ```go
 
-arr := [5]int{1, 2, 3, 4, 5}
-
-s := arr[2:4] // -> [3, 4]
-
-fmt.Printf("%v", len(s)) // 2
-
-fmt.Printf("%v", cap(s)) // 3，因为除了3和5，还隐藏着5
-
-// 那怎么证明5是在的呢
-
-s = s[0:3] // -> [3, 4, 5]
-```
-注意上面的例子，其实s的长度是2，理论上取s的0:3是会报错的，实际上不是这样，这个End可以超过其len，是可以正常工作并取到相应的值的，但不能超过cap，超过cap的话就真的会报错了
-
-**注意：上面虽然可以使用[:]的方式拿到超过len但不超过cap的数据，但是如果用s[i]这样的方式直接去取超过len的值，实际上是会报错的，即使i没有超过cap**
-
-### slice的追加与删除
-
-系统有内建方法中其实只给了追加的方法
-
-```go
-s := []int{1, 2}
-
-s = append(s, 3, 4, 5) // -> [1 2 3 4 5]
-
-// 如果要append另一个slice可以这样
-// 在追加的这个slice后面跟...，有点像javascript的解构，只不是解构的...是在前面
-
-s2 := []int{1, 2}
-
-s3 := []int{3, 4, 5}
-
-s4 := append(s2, s3...)
-```
-
-既然内建方法中没有删除功能，那我们怎么做呢？
-
-记得[:]吗？用它就可以
-
-```go
-s := []int{1, 2, 3}
-
-// 删除头
-s2 := s[1:] // -> [2, 3]
-
-// 删除尾
-s3 := s[:len(s) - 1] // -> [1, 2]
-
-// 删除中间（比较麻烦，但还是可以做的）
-s3 := append(s[:1], s[2:]...) // -> [1, 3]
-```
-
-### slice的其他声明方式
-
-即然有cap，那我们如果在声明的时候就把cap值一起声明了呢
-
-要注意的是，cap不能小于len，否则是会报错的
-```go
-
-s := make([]int, 3) // 声明3个长度的slice
-
-s2 := make([]int, 3, 16) // 声明长度为3但cap为16的slice
-
-// 也可以这样
-// 这里其实有两个步骤
-// 1、声明了一个len为16的slice
-// 2、通过[:]分割，把他的长度缩减到3
-// 其实是利用了cap在len缩减时不会跟着缩减的特性
-s3 := make([]int, 16)[:3]
-```
-
-在声明的时候就设置cap有什么好处呢？
-
-```go
-
-s := []int{}
-
-for i := 0; i < 100; i++ {
-  s = append(s, i)
-  fmt.Println(len(s), cap(s))
-}
+const (
+  a = 1
+  b
+  c
+)
 
 /*
-打印结果：
-1 1
-2 2
-3 4
-4 4
-5 8
-6 8
-7 8
-8 8
-9 16
-10 16
-11 16
-12 16
-13 16
-14 16
-15 16
-16 16
-17 32
-...
+a -> 1
+b -> 1
+c -> 1
+*/
+
+const (
+  x = 999
+  y = 1
+  z
+)
+
+/*
+x -> 999
+y -> 1
+z -> 1
 */
 ```
 
-可以看到len在不断增加的同时，cap也会在适合的时机增加，不同的是cap是以2(^n)的形式增加，为什么不和len一样的方式增加呢？
+### 自定义数据类型
 
-其原因在于，cap在变的时候实际上做了一次array的搬家工作，扔掉原来的那个array，建立一个新的足够长的array，再把数据给考拷贝过来，这个过程是很消耗资源的，所以我们在能预知cap会扩容到多大的情况下，又或者slice会平凡的扩充数据的话，应该在声明的时候就设置他的cap值
-
-
-### slice的cap引起的一些问题，append并不一定返回一个新的slice
-
-考虑以下问题：
+除了系统内建的数据类型外，我们还可以自定义数据类型，使用type关键字
 
 ```go
 
-arr := [5]int{1, 2, 3, 4, 5}
+type myInt int
 
-s := arr[:] // -> [1, 2, 3, 4, 5]
+var a myInt = 1
 
-s2 := s[:2] // -> [1, 2]
-s2 = append(s2, 99) // -> [1, 2, 99] 注意，s2的cap有5，足够再加一个99，没有返回一个新的slice
-
-fmt.Println(arr, s, s2)
-// arr -> [1, 2, 99, 4, 5]
-// s   -> [1, 2, 99, 4, 5]
-// s2  -> [1, 2, 99]
 ```
-原因是s2的cap足够长，有5，所以在append的时候，在这个slice的2号下标位置设置为99，但实际上他原来view的是这个arr的3这个值，所以3会被替换99变成这个样子
-
-
-
-**但如果cap不够长的时候，就会是另一种表现：**
-
-与上方的例子区别在于，下方的这个s在append的时候，他的cap不够了，所以原来的数组放不下99这个数值了，所以系统会新开一个数组给他，s所view的数组已经不再是arr了
-
-```go
-arr := [5]int{1, 2, 3, 4, 5}
-
-s := arr[:]
-s = append(s, 99) // -> [1, 2, 3, 4, 5, 99]
-
-fmt.Println(arr, s)
-// arr -> [1, 2, 3, 4, 5]
-// s   -> [1, 2, 3, 4, 5, 99]
-
-// s已经不再是arr的一个view了
-s[0] = 100
-
-fmt.Println(arr, s)
-// arr -> [1, 2, 3, 4, 5]
-// s   -> [100, 2, 3, 4, 5, 99]
-```
-
-### array或slice的遍历
-
-在遍历上，array和slice没有本质上的区别
-
 ```go
 
-s := []string{"a", "b", "c", "d", "e"}
+type myFunc func(int) int
 
-// 使用range遍历
-for i, v := range s {
-  fmt.Println(i, v)
+var a myFunc = func(i int) int {
+  return i
 }
-
-/*
-0 a
-1 b
-2 c
-3 d
-4 e
-*/
-
-// 使用for遍历
-// 注意的是slice只能用小于len而不能小于cap，前面也提到过如果s[i]的这个i超过len但即便没超过cap，也是会报错的
-
-for i := 0; i < len(s); i++ {
-  fmt.Println(s[i])
-}
-
-/*
-a
-b
-c
-d
-e
-*/
-
-
-
 
 ```
 
-### array或slice的值如果是struct或map类型，可省略其类型
+自定义数据类型还有个好处就是能给这个数据类型定义方法，在function这节我们会讲
+
+### 访问权限
+
+golang并没有public或是private这些关键字，也没有常量一定要是大写的说法，一般我们常量还是小写的
+
+```go
+var Str = "hello" // public
+
+var foo = "world" // private
+```
+
+**他们的区别在于首字母是否为大写**
+
+这种访问权限的控制方式，除了const/var之外，func、type也是如此
+
+
+
+### 变量的类型转换
+
+golang只有强制转换，没有隐式转换，一般来说，我们使用Type(n)的方式来强制转换，但也有一些类型是没法强制转的，需要借助标准库或第三方库
 
 ```go
 
-// 值是个map[string]int
-s := []map[string]int{
-  {"a": 1},
-  {"b": 2},
-  {"c": 3},
+var a float64 = 123.4
+
+var b int = int(a) // -> 123
+
+var c string = string(b) // !!! 注意：c转出来之后是"{"，系统会把他当作字节码
+
+// 所以int转string的正确方式是：
+var d = strconv.Itoa(b) // strconv是一个标准库
+
+```
+
+### interface{}类型
+
+interface{}类型可以认为是任意类型，他与interface接口是两个不同的东西
+
+```go
+
+var a interface{} = 123
+  
+a = "str"
+
+a = false
+
+```
+
+如果不是interface{}类型，或者没有显式的告诉系统他是该类型，这样重复赋值是会编译错误的，但是interface{}在使用时也是需要转换类型的，就像前面所说的，golang没有隐式转换，如下代码
+
+```go
+
+var x, y interface{} = 1.5, 3.3
+
+math.Max(x, y) // !!! 编译错误, x, y需要float64
+
+```
+```go
+
+func foo(val string)  {
+  // do something...
 }
 
-type some struct {
+var str interface{} = "i am a string"
+
+foo(str) // !!! 编译错误
+
+```
+
+可能大家会想到用强制转换的方式
+
+```go
+
+var str interface{} = "i am a string"
+
+foo(string(str)) // !!! 同样的，编译错误
+
+```
+
+正确的interface{}类型用法
+
+```go
+var str interface{} = "i am a string"
+
+foo(str.(string)) // ok
+```
+
+需要注意的是，这种写法必须该变量确实是该类型的，否则会报运行时错误
+
+```go
+func foo(val int)  {
+  // do something...
+}
+
+var val interface{} = 3.14
+
+foo(val.(int)) // !!! 运行时错误，系统会告诉你val其实是float64
+
+// 如果真要让他正常运行，需要这样做
+
+foo(int(val.(float64))) // ok
+
+```
+
+### 零值
+
+所有变量的声明都会有默认值，这个值我们称为零值，常量例外，因为常量在声明的时候是必须赋值的
+
+```go
+
+var a int
+
+fmt.Println(a) // -> 0
+
+```
+```go
+
+var b float32
+
+fmt.Println(b) // -> 0  float类型的零值也是0，并不是0.0之类的
+
+```
+```go
+
+var c string
+
+fmt.Println(c) // -> 注意，系统不会打印任何内容，其实他是空字符串，下面这样打印会比较明显
+fmt.Printf("%q", c) // -> ""
+
+```
+```go
+
+var d bool
+
+fmt.Println(d) // -> false
+
+```
+```go
+
+var e complex64
+
+fmt.Println(e) // -> (0+0i)
+
+```
+```go
+
+var f interface{}
+
+fmt.Println(f) // -> nil
+
+```
+
+其他的还有例如方法和指针，默认值是nil；array和map，默认值是他的value类型对应的零值
+
+
+### new函数
+
+变量声明是可以使用系统内建的new函数声明的，不同的是，该函数返回的是一个指针
+
+```go
+var a = new(int)
+
+*a = 123 // 用*取指针指向的内容，然后对他赋值
+
+fmt.Println(*a) // -> 123
+```
+但一般我们不会用于new一个int或是float这类基础类型，比如定义工厂方法，去创建一个struct，是比较常规的(后面会讲到struct，func这些)
+
+```go
+type person struct {
   name string
-  old  int
+  age int
 }
 
-s2 := []some{
-  {name: "eason", old: 18},
-  {name: "who?", old: 100},
+func createPerson(name string, age int) *person {
+  var p = new(person)
+
+  p.name = name
+  p.age = age
+
+  return p
 }
+
+p := createPerson("eason", 18) // better
+```
+
+### iota
+
+iota其实是个值，而且他只能用于const，他常被用于枚举，因为golang其实没有enum类型，注意他的特性
+
+- 他的值默认是0，但在不断的赋给常量后会自动增加
+- 当他遇到下一个const时，他会自动归零
+
+```go
+const a = iota // -> 0
+const b = iota // -> 0
+```
+
+**他通常用于一组const的声明，这样才会发挥他的功效**
+
+```go
+const (
+  a = iota // -> 0
+  b = iota // -> 1
+  c = iota // -> 2
+)
+
+const ( // 注意：这里遇到第二个const了，iota会归零
+  x = iota // -> 0
+  y = iota // -> 1
+  z = iota // -> 2
+)
+```
+
+当然我们使用的时候应该结合const组声明时继承的特性
+
+```go
+const (
+  a = iota // -> 0
+  b // -> 1
+  c // -> 2
+)
+```
+
+他也可以参与运算
+
+```go
+const (
+  a = iota * 2 + 1 // -> 1
+  b // -> 3
+  c // -> 5
+)
+```
+
+### 堆/栈
+
+关于变量存在于堆内还是栈内其实我们不需要关心，golang有自动的垃圾回收机制
+
+在golang里，其实func是一等公民，是可以作为参数传递的，他也有闭包的概念，比如这样
+
+```go
+
+func foo() func() *int {
+  v := 1
+  return func() *int {
+    return &v
+  }
+}
+
+f := foo()
+
+res := f()
+
+fmt.Println(*res) // -> 1
 
 ```
+
+这个例子是这样的，foo方法返回一个func，这个被返回的func没有参数并返回一个int的指针，所以我们执行了foo之后拿到的其实是一个func，然后我们调用这个func会拿到在foo方法内但不在返回的这个func内的一个int(因为用了指针，所以就是这个int，并不是一个新的值相同的int)
+
+通常情况下，变量的声明是存在于栈内的，函数执行完成出栈后该函数包括函数内的变量都会被销毁，但这个闭包例子就是个例外，如果v存在于栈内，随着foo方法的执行完成，v会随之被销毁，但实际上并没有，因为我们在调用f()的时候还是可以拿到他，所以这个时候这个int就会存在于堆内，系统会在不再使用他之后进行销毁
