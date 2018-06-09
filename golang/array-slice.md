@@ -46,9 +46,9 @@ golang可以使用var或const关键字声明，或者使用:=进行短声明，�
 
 var a int = 100
 
-var b = "foo" // 系统会判断他是string类型
+const b = "foo" // 系统会判断他是string类型
 
-const d = []int{1, 2, 3}
+var d = []int{1, 2, 3}
 
 var n, m int = 100, 200
 
@@ -67,12 +67,12 @@ const a = 100
 
 let b = 200
 
-const c = a + b // !! 报错
+const c = a + b // !! 报错，const不允许与变量组合
 
 ```
 ```go
 
-const n int // !! 报错
+const n int // !! 报错，常量在声明的时候就要赋值
 
 ```
 ```go
@@ -86,14 +86,14 @@ n = 200 // !! 报错
 
 k := "str"
 
-k := "hello" // !! 报错
+k := "hello" // !! 报错，:=是声明+赋值的概念，所以第二次使用相当于又声明了一次
 
 ```
 ```go
 
 q := "str"
 
-q = 100 // !! 报错
+q = 100 // !! 报错，系统已判定他是string类型，不能再赋其他类型的值
 
 ```
 ```go
@@ -131,6 +131,10 @@ const (
   c = false
 )
 ```
+
+### const声明的特性情况
+
+有些数据类型是不可以使用const声明的，指针类型的就不行，还有map、array、slice等
 
 const在按组声明的方式还有另一个特点，就是如果这个常量没有赋值，他将继承前一个值，并且他可以与iota形成一个奇妙的组合，在后面会讲到
 
@@ -197,8 +201,6 @@ var foo = "world" // private
 **他们的区别在于首字母是否为大写**
 
 这种访问权限的控制方式，除了const/var之外，func、type也是如此
-
-
 
 ### 变量的类型转换
 
