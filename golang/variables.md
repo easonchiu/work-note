@@ -190,7 +190,7 @@ var a myFunc = func(i int) int {
 
 ### 访问权限
 
-golang并没有public或是private这些关键字，也没有常量一定要是大写的说法，一般我们常量还是小写的
+golang并没有public或是private这些关键字，也没有常量一定要是大写的说法，一般我们常量还是小写的，我们所说的public和private是针对包来讲的
 
 ```go
 var Str = "hello" // public

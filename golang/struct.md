@@ -35,6 +35,10 @@ m := myStruct{
   },
 }
 
+// 注意：不能使用make方法创建
+
+m2 := make(myStruct) // !!! 编译错误
+
 ```
 
 当然他还可以更简洁的使用，不过一般我们不建议这样用，原因很简单，不易阅读（struct内定义的内容少的话可以考虑）
@@ -56,4 +60,50 @@ m := myStruct{
 ```go
 m := myStruct{name: "eason"}
 ```
+
+### 给struct定义内部方法
+
+可能有同学会觉得，struct和map[string]interface{}的区别在哪里，我们就来说说struct更有趣的地方
+
+```go
+type myStruct struct {
+  name string
+  age int
+  skill map[string]int
+}
+
+func (m myStruct) printName(say string) {
+  fmt.Println(say + m.name)
+}
+
+m := myStruct{name: "eason"}
+
+m.printName("hello, i am ") // -> hello, i am eason
+```
+
+### struct是按值传递的
+
+不管定义内部方法或是将struct作为参数传递给方法，系统都会拷贝一份，当然如果其内部使用了slice或map这类引用传递的数据，是拷贝他们的引用
+
+所以上面这个例子中如果修改m.name的话，在外部是不受影响的，我们需要这样做才是正确的
+
+```go
+
+func (m *myStruct) editName(name string) {
+  m.name = name
+}
+
+m := myStruct{name: "eason"}
+
+m.editName("woow~")
+
+fmt.Println(m.name) // -> woow~
+
+```
+
+可以看到我们定义editName时在其前方使用的是\*myStruct，是一个指针；通常情况下，我们建议都使用指针操作，这样更节省资源，因为拷贝这个过程是需要消耗资源的
+
+**除此之外，struct可以实现接口，这个我们在接口这章会讲**
+
+
 
