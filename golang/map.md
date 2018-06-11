@@ -153,7 +153,7 @@ fmt.Println(val, exist) // -> 0 false
 
 ### map在作为参数传递
 
-map作为参数传递时是引用传递的，其原因是因为他实际上是hash表的引用
+map作为参数传递时的表现和slice是几乎一样的，其原因是因为他内部有个指针指向一个hash表
 
 ```go
 
@@ -172,7 +172,7 @@ do(m)
 fmt.Println(m) // -> map[a:999]
 ```
 
-也就是说，当将它传递给另一个函数并操作，因为是引用传递，这个map本身当然是会被改变的。
+也就是说，当将它传递给另一个函数并操作，因为他内部有个指针指向同一个hash表，这个map本身当然是会被改变的。
 
 ### map的长度
 
@@ -231,7 +231,7 @@ m := map[string]map[int]int{
 这里的例子是map的key是string类型的，但他的value是个map[int]int类型，所以在声明的时候不需要声明value的这个类型
 
 ```go
-// 不需要这样做，但也不会报错
+// 不需要这样做（"A"后面的map[int]int可以省略），但也不会报错
 m := map[string]map[int]int{
   "A": map[int]int{
     1: 1,
