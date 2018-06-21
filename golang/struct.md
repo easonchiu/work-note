@@ -61,6 +61,66 @@ m := myStruct{
 m := myStruct{name: "eason"}
 ```
 
+### struct的组合，即struct内包含了另一个struct
+
+先看例子
+
+```go
+type bar struct {
+  other string
+}
+
+type foo struct {
+  key int
+  value string
+  bar // 这里可以写成 bar bar，也可以省略只写一个，但他们在使用上略有差异
+}
+
+f := foo{
+  key: 123,
+  value: "abcd",
+  bar: bar{
+    other: "www",
+  },
+}
+```
+
+在使用时我们可以看到其实并无太多花样，正常嵌套就行，不过在取值的时候有些不同，我们注意到下面例子是直接取的f.other并不是f.bar.other，允许这样使用有两个条件：
+
+1. 在bar的外部没有名为other的属性，如果有，其实就是取的外部的这个other
+2. 这一点很重要，我们看到bar只写了一个，**只有一个的时候允许**
+
+```go
+fmt.Println(f.other) // -> www
+```
+
+**这样就会编译错误**
+
+```go
+type bar struct {
+  other string
+}
+
+type foo struct {
+  key int
+  value string
+  bar bar
+}
+
+f := foo{
+  key: 123,
+  value: "abcd",
+  bar: bar{
+    other: "www",
+  },
+}
+
+fmt.Println(f.other) // !!! 编译错误，只允许使用f.bar.other的方式访问
+```
+
+所以我们建议任何情况下，都使用f.bar.other的这种方式访问
+
+
 ### 给struct定义内部方法
 
 可能有同学会觉得，struct和map[string]interface{}的区别在哪里，我们就来说说struct更有趣的地方
